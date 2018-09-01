@@ -1,0 +1,26 @@
+doctype html
+html(lang='en')
+  head
+    meta(charset='UTF-8')
+    meta(name='viewport', content='width=device-width, initial-scale=1.0')
+    meta(http-equiv='X-UA-Compatible', content='ie=edge')
+    link(href='https://fonts.googleapis.com/css?family=Montserrat:400,500,900&subset=cyrillic', rel='stylesheet')
+    link(rel='stylesheet', href='/oscar/public/ap-64-emoji.min.css')
+    link(rel='stylesheet', href='/oscar/public/style.css')
+    meta(property='og:title', content='Я режисер года')
+    meta(property='og:image', content='')
+    // TODO
+    title Oscar
+  body
+    .results
+      .copyright
+        // <span class="channel-link">t.me/uxlive</span>
+        // img.logo(src='logo.png', alt='Logo')
+      .emojis
+        each emoji in emojis
+          img(src='/oscar/public/emojis/' + emoji + '.png')
+        //- img(src='emojis/smile.png')
+        //- img(src='emojis/cry.png')
+        //- img(src='emojis/cat.png')
+      .text
+        span!= text

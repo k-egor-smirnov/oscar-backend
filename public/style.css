@@ -1,0 +1,40 @@
+body {
+    margin: 0
+}
+
+.results {
+    position: relative;
+    width: 600px;
+    height: 350px;
+    background-color: #1f2128;
+    /* border-radius: 4px; */
+}
+
+.emojis {
+    padding-top: 32px;
+    padding-bottom: 48px;
+    display: flex;
+    justify-content: space-evenly;
+}
+
+.text {
+    margin: 0 32px 0 32px;
+    padding-bottom: 64px;
+    color: white;
+    font-family: Montserrat;
+    line-height: 32px;
+    font-size: 22px;
+}
+
+.copyright {
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+}
+
+.channel-link {
+    font-family: Montserrat;    
+    color: white;
+    font-size: 18px;
+    font-weight: 500;
+}

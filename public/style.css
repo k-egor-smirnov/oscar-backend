@@ -11,8 +11,8 @@ body {
 }
 
 .emojis {
-    padding-top: 32px;
-    padding-bottom: 48px;
+    padding-top: 16px;
+    padding-bottom: 32px;
     display: flex;
     justify-content: space-evenly;
 }

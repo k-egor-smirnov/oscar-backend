@@ -5,7 +5,18 @@ const path = require("path");
 
 const readFileAsynx = util.promisify(fs.readFile);
 
-const allowedProps = ["cripple"];
+const allowedProps = [
+  "cripple",
+  "animal",
+  "slavery",
+  "poorness",
+  "fatal",
+  "religion",
+  "cartoon",
+  "musical",
+  "gender",
+  "color"
+];
 
 class CacheManager {
   constructor(client) {

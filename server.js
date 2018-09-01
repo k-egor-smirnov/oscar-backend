@@ -1,73 +1,89 @@
-const express = require('express')
-const bodyparser = require('body-parser')
-const generate = require('./generate')
-const puppeteer = require('puppeteer')
-const path = require('path')
-const redis = require('redis')
-const client = redis.createClient()
-const cache = require('express-redis-cache')({ client })
-const cors = require('cors')
-const qs = require('qs')
+const express = require("express");
+const bodyparser = require("body-parser");
+const generate = require("./generate");
+const puppeteer = require("puppeteer");
+const path = require("path");
+const redis = require("redis");
+const client = redis.createClient();
+const cors = require("cors");
+const qs = require("qs");
 
-cache.on('connected', function () {
-  console.log('connected')
-})
+const CacheManager = require("./CacheManager");
+const cache = new CacheManager(client);
 
-cache.on('message', function (message) {
-  console.log('message', message)
-})
+const app = express();
 
-const app = express()
+let browser;
 
-let browser
+app.engine("pug", require("pug").__express);
 
-app.engine('pug', require('pug').__express)
-
-app.set('views', path.join(__dirname, 'views'))
-app.set('view engine', 'pug')
+app.set("views", path.join(__dirname, "views"));
+app.set("view engine", "pug");
 
 // app.use(cors())
-app.use(bodyparser.json())
-app.use(express.static('public'))
+app.use(bodyparser.json());
+app.use(express.static("public"));
 
-app.get('/oscar/api/generate', async (req, res, next) => {
-  const text = generate.text(req.query)
-  const emojis = generate.emoji(req.query)
+app.get("/oscar/api/generate", async (req, res, next) => {
+  const text = generate.text(req.query);
+  const emojis = generate.emoji(req.query);
 
-  res.render('index', { text, emojis })
-})
+  res.render("index", { text, emojis });
+});
 
-app.get('/oscar/api/get', (req, res, next) => {
-  const startDate = new Date()
+app.get("/oscar/api/get", async (req, res, next) => {
+  const startDate = new Date();
 
-  ;(async () => {
-    const page = await browser.newPage()
+  const cached = await cache.getImage(req.query);
+
+  if (cached) {
+    console.log(`[cached] fetch photo in ${new Date() - startDate}ms`);
+
+    res.end(cached);
+
+    return;
+  }
+
+  console.log("not cached page");
+  (async () => {
+    const page = await browser.newPage();
     page.setViewport({
       width: 600,
       height: 350
-    })
+    });
 
-    page.once('load', async () => {
-      console.log('page loaded', new Date() - startDate + 'ms')
-      const screenshot = await page.screenshot()
-      const endDate = new Date()
+    page.once("load", async () => {
+      console.log("page loaded", new Date() - startDate + "ms");
 
-      res.end(screenshot, 'binary')
+      const screenshotPath = path.join(
+        __dirname,
+        "generated",
+        cache.getHash(req.query) + ".png"
+      );
 
-      page.close()
+      const screenshot = await page.screenshot({
+        path: screenshotPath
+      });
 
-      console.log('ready', endDate - startDate + 'ms')
-    })
+      const endDate = new Date();
 
-    await page.goto('http://localhost/oscar/api/generate?' + qs.stringify(req.query))
-  })()
-})
+      res.end(screenshot, "binary");
 
-;(async () => {
-  browser = await puppeteer.launch()
+      page.close();
 
-  app.listen(3011, (err) => {
-    if (err) console.log(err)
-    console.log('browser initialized')
-  })
-})()
+      console.log(`[not cached] fetch photo in ${new Date() - startDate}ms`);
+    });
+
+    await page.goto(
+      "http://localhost/oscar/api/generate?" + qs.stringify(req.query)
+    );
+  })();
+});
+(async () => {
+  browser = await puppeteer.launch();
+
+  app.listen(3011, err => {
+    if (err) console.log(err);
+    console.log("browser initialized");
+  });
+})();
